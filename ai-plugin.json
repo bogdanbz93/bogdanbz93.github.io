@@ -1,18 +1,18 @@
 {
-  "schema_version": "v1",
-  "name_for_model": "AccessHscCopilotAssurePlugin",
+  "contact_email": "support@theaccessgroup.com",
+  "api": {
+    "url": "https://dev-api.assure.hsc.accessacloud.com/memo/service/v3/api-docs/Copilot-API",
+    "has_user_authenticated": "false",
+    "type": "openapi"
+  },
   "name_for_human": "Access Assure",
+  "schema_version": "v1",
   "description_for_model": "Assists the user to know better the Access Assure and its data.",
   "description_for_human": "Assists the user to know better the Access Assure.",
+  "logo_url": "https://dev-api.assure.hsc.accessacloud.com/memo/img/menu_logo.png",
+  "name_for_model": "AccessHscCopilotAssurePlugin",
   "auth": {
     "type": "none"
   },
-  "api": {
-    "type": "openapi",
-    "has_user_authenticated": "false",
-    "url": "https://assurecopilot.beauty:8080/v3/api-docs"
-  },
-  "logo_url": "https://play-lh.googleusercontent.com/psGMO5vB8ZvIN_RDhWXG2ckqisi4ZmEaJYnVN5iLsw1e1zloXjDAnTUVjrYCkM7Dmulb=w240-h480-rw",
-  "contact_email": "support@theaccessgroup.com",
   "legal_info_url": "https://www.theaccessgroup.com/en-gb/legal-policy"
 }
