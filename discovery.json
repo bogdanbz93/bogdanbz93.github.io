@@ -1,0 +1,18 @@
+{
+  "plugins": [
+    {
+      "id": "AccessHscCopilotAssurePlugin",
+      "availability": "HasAccess",
+      "suggestions": [
+        {
+          "question": "What is Access Assure?",
+          "label": "What is Access Assure?"
+        },
+        {
+          "question": "How many Assure organisations are linked with Workspace?",
+          "label": "Organisations linked with Workspace"
+        }
+      ]
+    }
+  ]
+}
