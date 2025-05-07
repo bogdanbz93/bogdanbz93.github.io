@@ -1,7 +1,5 @@
 {
   "plugins" : [ {
-    "id" : "AccessHscCopilotAssurePlugin",
-    "availability" : "HasAccess",
     "suggestions" : [ {
       "question" : "What are the key features of the Home Dashboard?",
       "label" : "What are the key features of the Home Dashboard?"
@@ -14,6 +12,8 @@
     }, {
       "question" : "How do I enable a Smart Alert?",
       "label" : "How do I enable a Smart Alert?"
-    } ]
+    } ],
+    "availability" : "HasAccess",
+    "id" : "AccessHscCopilotAssurePlugin"
   } ]
 }
