@@ -10,9 +10,9 @@
   "api": {
     "type": "openapi",
     "has_user_authenticated": "false",
-    "url": "https://assurecopilot.beauty:8080/v3/api-docs"
+    "url": "https://dev-api.assure.hsc.accessacloud.com/memo/service/v3/api-docs/Copilot-API"
   },
-  "logo_url": "https://play-lh.googleusercontent.com/psGMO5vB8ZvIN_RDhWXG2ckqisi4ZmEaJYnVN5iLsw1e1zloXjDAnTUVjrYCkM7Dmulb=w240-h480-rw",
+  "logo_url": "https://dev-api.assure.hsc.accessacloud.com/memo/img/menu_logo.png",
   "contact_email": "support@theaccessgroup.com",
   "legal_info_url": "https://www.theaccessgroup.com/en-gb/legal-policy"
 }
