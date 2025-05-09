@@ -10,7 +10,7 @@
   "api": {
     "type": "openapi",
     "has_user_authenticated": "false",
-    "url": "https://dev-api.assure.hsc.accessacloud.com/memo/service/v3/api-docs/Copilot-API"
+    "url": "https://assurecopilot.beauty:8080/v3/api-docs"
   },
   "logo_url": "https://dev-api.assure.hsc.accessacloud.com/memo/img/menu_logo.png",
   "contact_email": "support@theaccessgroup.com",
