@@ -4,6 +4,7 @@
   "name_for_human": "Access Assure",
   "description_for_model": "Assists the user to know better the Access Assure and its data.",
   "description_for_human": "Assists the user to know better the Access Assure.",
+  "description_overall": "test",
   "auth": {
     "type": "none"
   },
