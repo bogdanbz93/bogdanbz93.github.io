@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_model": "AccessHscCopilotAssurePlugin",
+  "name_for_human": "Access Assure",
+  "description_for_model": "Assists the user to know better the Access Assure and its data.",
+  "description_for_human": "Assists the user to know better the Access Assure.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "has_user_authenticated": "false",
+    "url": "https://bogdanbz93.github.io/v3/api/copilot.json"
+  },
+  "logo_url": "https://dev-api.assure.hsc.accessacloud.com/memo/img/menu_logo.png",
+  "contact_email": "support@theaccessgroup.com",
+  "legal_info_url": "https://www.theaccessgroup.com/en-gb/legal-policy"
+}
