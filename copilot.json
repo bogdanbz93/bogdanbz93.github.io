@@ -52,30 +52,6 @@
         }
       }
     },
-    "/discovery": {
-      "get": {
-        "tags": [
-          "evo-controller"
-        ],
-        "operationId": "getDiscovery",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "object"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
   "components": {
     "schemas": {}
   }
