@@ -1,0 +1,82 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Access Assure API Documentation",
+    "description": "Description of the API methods available for Access Assure",
+    "version": "3.4.0"
+  },
+  "servers": [
+    {
+      "url": "https://yqm9d5ki4j.execute-api.us-east-1.amazonaws.com/Stage",
+      "description": "Updated server url"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "evo-controller"
+        ],
+        "summary": "Should be used for almost every general question about Access Assure The CoPilotMessage and the ExtractChatHistory are both MANDATORY parameters if they exist No additional information should be added on top of what already exists, only what is returned It's mandatory that the information must be presented without too much editing or additions",
+        "description": "This endpoint returns the most relevant information about Access Assure, without extra information",
+        "operationId": "AskAboutAssure",
+        "parameters": [
+          {
+            "name": "coPilotMessage",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "extractChatHistory",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Access Assure description returned successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/discovery": {
+      "get": {
+        "tags": [
+          "evo-controller"
+        ],
+        "operationId": "getDiscovery",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {}
+  }
+}
