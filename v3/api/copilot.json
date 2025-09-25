@@ -14,10 +14,8 @@
   "paths": {
     "/": {
       "get": {
-        "tags": [
-          "evo-controller"
-        ],
-        "summary": "Should be used for almost every general question about Access Assure The CoPilotMessage and the ExtractChatHistory are both MANDATORY parameters if they exist No additional information should be added on top of what already exists, only what is returned It's mandatory that the information must be presented without too much editing or additions",
+        "tags": ["evo-controller"],
+        "summary": "General Access Assure query",
         "description": "This endpoint returns the most relevant information about Access Assure, without extra information",
         "operationId": "AskAboutAssure",
         "parameters": [
@@ -25,28 +23,20 @@
             "name": "coPilotMessage",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "extractChatHistory",
             "in": "query",
             "required": false,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
           "200": {
             "description": "Access Assure description returned successfully",
             "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string"
-                }
-              }
+              "*/*": { "schema": { "type": "string" } }
             }
           }
         }
@@ -54,9 +44,7 @@
     },
     "/discovery": {
       "get": {
-        "tags": [
-          "evo-controller"
-        ],
+        "tags": ["evo-controller"],
         "operationId": "getDiscovery",
         "responses": {
           "200": {
@@ -65,10 +53,26 @@
               "*/*": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "object"
-                  }
+                  "additionalProperties": { "type": "object" }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/report": {
+      "get": {
+        "tags": ["report-controller"],
+        "summary": "Retrieve the latest generated report",
+        "description": "Returns the most recent report generated, including Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The response is returned in Markdown format.",
+        "operationId": "getLatestReport",
+        "responses": {
+          "200": {
+            "description": "Latest report returned successfully",
+            "content": {
+              "text/markdown": {
+                "schema": { "type": "string" }
               }
             }
           }
@@ -76,7 +80,5 @@
       }
     }
   },
-  "components": {
-    "schemas": {}
-  }
+  "components": { "schemas": {} }
 }
