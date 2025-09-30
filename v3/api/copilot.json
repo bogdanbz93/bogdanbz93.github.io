@@ -64,7 +64,7 @@
     "/report": {
       "get": {
         "tags": ["report-controller"],
-        "summary": "Retrieve the latest generated report",
+        "summary": "Retrieve the latest generated report or LLM Summary",
         "description": "Returns the most recent report generated, including Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The response is returned in Markdown format.",
         "operationId": "getLatestReport",
         "responses": {
