@@ -65,7 +65,7 @@
       "get": {
         "tags": ["report-controller"],
         "summary": "This endpoint it's used for every question related to LLM Summaries (or AI Summaries, LLM Reports, LLM Summaries)",
-        "description": "Returns the most recent report generated, including Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The response is returned in Markdown format. Everytime someone it's asking about a report, tell them kindly to mention the Service User ID before returning the report.",
+        "description": "Returns the most recent report generated, including Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The response is returned in Markdown format. Everytime someone it's asking about a report, tell them kindly to mention the Service User ID before returning the report and optional, if they want it to Spanish, French or German (default is English).",
         "operationId": "getLatestReport",
         "responses": {
           "200": {
