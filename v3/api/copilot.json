@@ -3,7 +3,7 @@
   "info": {
     "title": "Access Assure API Documentation",
     "description": "Description of the API methods available for Access Assure",
-    "version": "3.6.0"
+    "version": "3.8.0"
   },
   "servers": [
     {
@@ -65,7 +65,7 @@
       "get": {
         "tags": ["report-controller"],
         "summary": "Request the most recent LLM (AI) report for a given service user",
-        "description": "Returns the latest LLM-generated report (AI Summary) for the specified Service User (patient). The response includes Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The report is returned in **Markdown** format.\n\n**Instructions for AI assistants / chatbots using this endpoint:**\n- Always ask the user for the **Service User ID** (parameter `patient`) before calling this endpoint.\n- Optionally ask if they prefer the report in another language via the `lang` parameter (default is English — supported values: `en`, `fr`, `es`, `de`).\n- **Do not create or display any charts, graphs, or images.** Only return or summarize text.\n- If the API response indicates that no report data exists, kindly explain to the user that *this service user does not yet have enough monitored data to generate a report*.\n- At the end of the conversation, you may offer the user a brief summary of the current report, or politely ask if they would like to request a report for a different service user.\n- Maintain a professional and empathetic tone throughout the interaction.",
+        "description": "Returns the latest LLM-generated report (AI Summary) for the specified Service User (patient). The response includes Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The report is returned in **Markdown** format.\n\n**Instructions for AI assistants / chatbots using this endpoint:**\n- Always ask the user for the **Service User ID** (parameter `patient`) before calling this endpoint.\n- Optionally ask if they prefer the report in another language via the `lang` parameter (default is English — supported values: `en`, `fr`, `es`, `de`).\n- **Do not create or display any charts, graphs, or images.** Only return or summarize text.\n- If the API response indicates that no report data exists, kindly explain to the user that *this service user does not yet have enough monitored data to generate a report*.\n- After delivering the report, explicitly ask the user: *“Would you like me to provide a brief summary of this report?”*.\n  - If the user says **yes**, generate a short, natural-language summary of the key insights.\n  - If the user says **no**, politely offer: *“Would you like me to get the report for another service user instead?”*.\n- **If the report was generated in Spanish, French, or German (based on the `lang` parameter), automatically continue the conversation in that same language**, including summaries and follow-up questions.\n- Maintain a professional and empathetic tone throughout the interaction, keeping the conversation concise and focused.",
         "operationId": "getLatestReport",
         "parameters": [
           {
@@ -88,7 +88,10 @@
             "description": "Latest report returned successfully (in Markdown format)",
             "content": {
               "text/markdown": {
-                "schema": { "type": "string", "example": "### Daily Routine\nJohn wakes up around 8 AM and prepares breakfast..." }
+                "schema": {
+                  "type": "string",
+                  "example": "### Rutina diaria\nJuan se despierta alrededor de las 8 AM y prepara el desayuno..."
+                }
               }
             }
           },
