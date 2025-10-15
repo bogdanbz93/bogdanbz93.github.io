@@ -15,8 +15,8 @@
     "/": {
       "get": {
         "tags": ["evo-controller"],
-        "summary": "General Access Assure query",
-        "description": "This endpoint returns the most relevant information about Access Assure, without extra information.",
+        "summary": "General query endpoint for Access Assure",
+        "description": "Use this endpoint for almost all general questions about **Access Assure**.\n\n**Usage instructions:**\n- Both `CoPilotMessage` and `ExtractChatHistory` parameters are **mandatory**, if they exist.\n- Do **not** add any extra information beyond what is already available — return only what the API provides.\n- The returned information must be presented **faithfully**, without heavy rewording or additional commentary.\n\n**Language handling:**\n- If the user asks a question in another language, send the `coPilotMessage` in **English**, but return the final answer in the **same language** as the user’s query.\n\n**If no relevant result is found:**\n- Return the message: *“I am sorry, I could not find any information related to your question in Access Assure documentation. We will update our documentation soon.”*",
         "operationId": "AskAboutAssure",
         "parameters": [
           {
