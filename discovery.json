@@ -1,19 +1,9 @@
 {
-  "plugins" : [ {
-    "suggestions" : [ {
-      "question" : "What are the key features of the Home Dashboard?",
-      "label" : "What are the key features of the Home Dashboard?"
-    }, {
-      "question" : "How do I configure a report?",
-      "label" : "How do I configure a report?"
-    }, {
-      "question" : "What are the key events tracked in the Activity section?",
-      "label" : "What are the key events tracked in the Activity section?"
-    }, {
-      "question" : "How do I enable a Smart Alert?",
-      "label" : "How do I enable a Smart Alert?"
-    } ],
-    "availability" : "HasAccess",
-    "id" : "AccessHscCopilotAssurePlugin"
-  } ]
+  "plugins": [
+    {
+      "suggestions": [],
+      "availability": "HasAccess",
+      "id": "AccessHscCopilotAssurePlugin"
+    }
+  ]
 }
