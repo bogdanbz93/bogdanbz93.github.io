@@ -1,132 +1,222 @@
 {
-  "openapi": "3.0.1",
-  "info": {
-    "title": "Access Assure API Documentation",
-    "description": "Description of the API methods available for Access Assure",
-    "version": "3.8.0"
-  },
-  "servers": [
-    {
-      "url": "https://yqm9d5ki4j.execute-api.us-east-1.amazonaws.com/Stage",
-      "description": "Updated server url"
-    }
-  ],
-  "paths": {
-    "/": {
-      "get": {
-        "tags": ["evo-controller"],
-        "summary": "General query endpoint for Access Assure",
-        "description": "Use this endpoint for almost all general questions about **Access Assure**.\n\n**Usage instructions:**\n- Both `CoPilotMessage` and `ExtractChatHistory` parameters are **mandatory**, if they exist.\n- Do **not** add any extra information beyond what is already available — return only what the API provides.\n- The returned information must be presented **faithfully**, without heavy rewording or additional commentary.\n\n**Language handling:**\n- If the user asks a question in another language, send the `coPilotMessage` in **English**, but return the final answer in the **same language** as the user’s query.\n\n**If no relevant result is found:**\n- Return the message: *“I am sorry, I could not find any information related to your question in Access Assure documentation. We will update our documentation soon.”*",
-        "operationId": "AskAboutAssure",
-        "parameters": [
-          {
-            "name": "coPilotMessage",
-            "in": "query",
-            "required": true,
-            "schema": { "type": "string" }
-          },
-          {
-            "name": "extractChatHistory",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Access Assure description returned successfully",
-            "content": {
-              "*/*": { "schema": { "type": "string" } }
-            }
-          }
-        }
+   "openapi":"3.0.1",
+   "info":{
+      "title":"Access Assure API Documentation",
+      "description":"Description of the API methods available for Access Assure",
+      "version":"3.8.0"
+   },
+   "servers":[
+      {
+         "url":"https://yqm9d5ki4j.execute-api.us-east-1.amazonaws.com/Stage",
+         "description":"Updated server url"
       }
-    },
-    "/discovery": {
-      "get": {
-        "tags": ["evo-controller"],
-        "operationId": "getDiscovery",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": { "type": "object" }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/report": {
-      "get": {
-        "tags": ["report-controller"],
-        "summary": "Request the most recent LLM (AI) report for a given service user",
-        "description": "Returns the latest LLM-generated report (AI Summary) for the specified Service User (patient). The response includes Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The report is returned in **Markdown** format.\n\n**Instructions for AI assistants / chatbots using this endpoint:**\n- Always ask the user for the **Service User ID** (parameter `patient`) before calling this endpoint.\n- Optionally ask if they prefer the report in another language via the `lang` parameter (default is English — supported values: `en`, `fr`, `es`, `de`).\n- **Do not create or display any charts, graphs, or images.** Only return or summarize text.\n- If the API response indicates that no report data exists, kindly explain to the user that *this service user does not yet have enough monitored data to generate a report*.\n- After delivering the report, explicitly ask the user: *“Would you like me to provide a brief summary of this report?”*.\n  - If the user says **yes**, generate a short, natural-language summary of the key insights.\n  - If the user says **no**, politely offer: *“Would you like me to get the report for another service user instead?”*.\n- **If the report was generated in Spanish, French, or German (based on the `lang` parameter), automatically continue the conversation in that same language**, including summaries and follow-up questions.\n- Maintain a professional and empathetic tone throughout the interaction, keeping the conversation concise and focused.",
-        "operationId": "getLatestReport",
-        "parameters": [
-          {
-            "name": "patient",
-            "in": "query",
-            "description": "The Service User ID for whom to retrieve the latest report",
-            "required": true,
-            "schema": { "type": "string", "example": "622" }
-          },
-          {
-            "name": "lang",
-            "in": "query",
-            "description": "Optional language code for the report (default: en). Supported: en, fr, es, de",
-            "required": false,
-            "schema": { "type": "string", "example": "en" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Latest report returned successfully (in Markdown format)",
-            "content": {
-              "text/markdown": {
-                "schema": {
-                  "type": "string",
-                  "example": "### Rutina diaria\nJuan se despierta alrededor de las 8 AM y prepara el desayuno..."
-                }
-              }
-            }
-          },
-          "204": {
-            "description": "No report available — insufficient monitored data for this service user",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "This service user does not yet have enough monitored data to generate a report."
-                    }
+   ],
+   "paths":{
+      "/":{
+         "get":{
+            "tags":[
+               "evo-controller"
+            ],
+            "summary":"General query endpoint for Access Assure",
+            "description":"Use this endpoint for almost all general questions about **Access Assure**.\n\n**Usage instructions:**\n- Both `CoPilotMessage` and `ExtractChatHistory` parameters are **mandatory**, if they exist.\n- Do **not** add any extra information beyond what is already available — return only what the API provides.\n- The returned information must be presented **faithfully**, without heavy rewording or additional commentary.\n\n**Language handling:**\n- If the user asks a question in another language, send the `coPilotMessage` in **English**, but return the final answer in the **same language** as the user’s query.\n\n**If no relevant result is found:**\n- Return the message: *“I am sorry, I could not find any information related to your question in Access Assure documentation. We will update our documentation soon.”*",
+            "operationId":"AskAboutAssure",
+            "parameters":[
+               {
+                  "name":"coPilotMessage",
+                  "in":"query",
+                  "required":true,
+                  "schema":{
+                     "type":"string"
                   }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Missing or invalid parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": { "type": "string" }
+               },
+               {
+                  "name":"extractChatHistory",
+                  "in":"query",
+                  "required":false,
+                  "schema":{
+                     "type":"string"
                   }
-                }
-              }
+               }
+            ],
+            "responses":{
+               "200":{
+                  "description":"Access Assure description returned successfully",
+                  "content":{
+                     "*/*":{
+                        "schema":{
+                           "type":"string"
+                        }
+                     }
+                  }
+               }
             }
-          }
-        }
+         }
+      },
+      "/discovery":{
+         "get":{
+            "tags":[
+               "evo-controller"
+            ],
+            "operationId":"getDiscovery",
+            "responses":{
+               "200":{
+                  "description":"OK",
+                  "content":{
+                     "*/*":{
+                        "schema":{
+                           "type":"object",
+                           "additionalProperties":{
+                              "type":"object"
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      },
+      "/tech":{
+         "get":{
+            "tags":[
+               "tech-controller"
+            ],
+            "summary":"Returns the recommended TEC devices for the specified service user",
+            "description":"Retrieves the Technology Enabled Care (TEC) devices recommended for a given service user (case). The response contains several sections, but the AI assistant must focus **only on the `inclusion` array**, which contains the list of devices.\n\n**Instructions for AI assistants using this endpoint:**\n- From the API response, use **only** the `data.result.inclusion` array.\n- For each device, extract and return **only these fields**:\n  - `name` — the device name (exact text, no rephrasing)\n  - `brand` — the manufacturer\n  - `qty` — quantity (if missing, treat as 1)\n- Ignore all other fields such as `bias`, `basedOn`, assessment details, and case metadata.\n- Present the information exactly as stored in the API, without adding interpretations.\n- If no devices exist in `inclusion`, respond: \"There are no TEC devices recorded for this service user.\".\n- If the user's question is in another language, send the request parameter in English but return the final answer in the user's language.",
+            "operationId":"getTechForCase",
+            "parameters":[
+               {
+                  "name":"caseId",
+                  "in":"query",
+                  "required":true,
+                  "description":"The Case ID associated with the service user",
+                  "schema":{
+                     "type":"string",
+                     "example":"280"
+                  }
+               }
+            ],
+            "responses":{
+               "200":{
+                  "description":"Device list retrieved successfully",
+                  "content":{
+                     "application/json":{
+                        "schema":{
+                           "type":"object",
+                           "properties":{
+                              "inclusion":{
+                                 "type":"array",
+                                 "items":{
+                                    "type":"object",
+                                    "properties":{
+                                       "name":{
+                                          "type":"string",
+                                          "example":"Motion Sensor"
+                                       },
+                                       "brand":{
+                                          "type":"string",
+                                          "example":"Develco"
+                                       },
+                                       "qty":{
+                                          "type":"integer",
+                                          "example":3
+                                       }
+                                    }
+                                 }
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "204":{
+                  "description":"No TEC devices found for this case"
+               },
+               "400":{
+                  "description":"Missing or invalid parameters"
+               }
+            }
+         }
+      },
+      "/report":{
+         "get":{
+            "tags":[
+               "report-controller"
+            ],
+            "summary":"Request the most recent LLM (AI) report for a given service user",
+            "description":"Returns the latest LLM-generated report (AI Summary) for the specified Service User (patient). The response includes Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The report is returned in **Markdown** format.\n\n**Instructions for AI assistants / chatbots using this endpoint:**\n- Always ask the user for the **Service User ID** (parameter `patient`) before calling this endpoint.\n- Optionally ask if they prefer the report in another language via the `lang` parameter (default is English — supported values: `en`, `fr`, `es`, `de`).\n- **Do not create or display any charts, graphs, or images.** Only return or summarize text.\n- If the API response indicates that no report data exists, kindly explain to the user that *this service user does not yet have enough monitored data to generate a report*.\n- After delivering the report, explicitly ask the user: *“Would you like me to provide a brief summary of this report?”*.\n  - If the user says **yes**, generate a short, natural-language summary of the key insights.\n  - If the user says **no**, politely offer: *“Would you like me to get the report for another service user instead?”*.\n- **If the report was generated in Spanish, French, or German (based on the `lang` parameter), automatically continue the conversation in that same language**, including summaries and follow-up questions.\n- Maintain a professional and empathetic tone throughout the interaction, keeping the conversation concise and focused.",
+            "operationId":"getLatestReport",
+            "parameters":[
+               {
+                  "name":"patient",
+                  "in":"query",
+                  "description":"The Service User ID for whom to retrieve the latest report",
+                  "required":true,
+                  "schema":{
+                     "type":"string",
+                     "example":"622"
+                  }
+               },
+               {
+                  "name":"lang",
+                  "in":"query",
+                  "description":"Optional language code for the report (default: en). Supported: en, fr, es, de",
+                  "required":false,
+                  "schema":{
+                     "type":"string",
+                     "example":"en"
+                  }
+               }
+            ],
+            "responses":{
+               "200":{
+                  "description":"Latest report returned successfully (in Markdown format)",
+                  "content":{
+                     "text/markdown":{
+                        "schema":{
+                           "type":"string",
+                           "example":"### Rutina diaria\nJuan se despierta alrededor de las 8 AM y prepara el desayuno..."
+                        }
+                     }
+                  }
+               },
+               "204":{
+                  "description":"No report available — insufficient monitored data for this service user",
+                  "content":{
+                     "application/json":{
+                        "schema":{
+                           "type":"object",
+                           "properties":{
+                              "message":{
+                                 "type":"string",
+                                 "example":"This service user does not yet have enough monitored data to generate a report."
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "400":{
+                  "description":"Missing or invalid parameters",
+                  "content":{
+                     "application/json":{
+                        "schema":{
+                           "type":"object",
+                           "properties":{
+                              "message":{
+                                 "type":"string"
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
       }
-    }
-  },
-  "components": { "schemas": {} }
+   },
+   "components":{
+      "schemas":{
+         
+      }
+   }
 }
