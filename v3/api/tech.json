@@ -1,0 +1,102 @@
+{
+  "data" : {
+    "result" : {
+      "case" : {
+        "id" : 280,
+        "status" : "COMPLETED",
+        "createdUtc" : 1744820469,
+        "updatedUtc" : 1744911454,
+        "user" : {
+          "firstName" : "Jonathan",
+          "lastName" : "Grace"
+        },
+        "assessment" : {
+          "id" : 20,
+          "status" : "ACTIVE",
+          "type" : "TEC",
+          "name" : "Technology Enabled Care (TEC) Assessment"
+        }
+      },
+      "exclusion" : [ ],
+      "inclusion" : [ {
+        "techId" : 1,
+        "brand" : "Access",
+        "name" : "Home Hub",
+        "bias" : 5,
+        "basedOn" : [ {
+          "section" : "About me:",
+          "question" : "I live:",
+          "option" : "At home, alone"
+        }, {
+          "section" : "My Goals",
+          "question" : "Me:",
+          "option" : "I want to feel safe at home"
+        }, {
+          "section" : "My Goals",
+          "question" : "Me:",
+          "option" : "I want to stay independent"
+        } ]
+      }, {
+        "techId" : 3,
+        "brand" : "Develco",
+        "name" : "Motion Sensor",
+        "bias" : 2,
+        "qty" : 3,
+        "basedOn" : [ {
+          "section" : "My Risks",
+          "question" : "To self",
+          "option" : "Getting up at night"
+        } ]
+      }, {
+        "techId" : 4,
+        "brand" : "Develco",
+        "name" : "Door/Window Sensor",
+        "bias" : 5,
+        "qty" : 2,
+        "basedOn" : [ {
+          "section" : "My Risks",
+          "question" : "To self",
+          "option" : "Wandering (Worry)"
+        } ]
+      }, {
+        "techId" : 6,
+        "brand" : "Vibby",
+        "name" : "Fall Detector",
+        "bias" : 5,
+        "basedOn" : [ {
+          "section" : "My Risks",
+          "question" : "To self",
+          "option" : "Fall / Collapse"
+        } ]
+      }, {
+        "techId" : 12,
+        "brand" : "Oysta",
+        "name" : "Aerosense",
+        "bias" : 5,
+        "basedOn" : [ {
+          "section" : "My Risks",
+          "question" : "To self",
+          "option" : "Fall / Collapse"
+        } ]
+      }, {
+        "techId" : 13,
+        "brand" : "Oysta",
+        "name" : "Rio",
+        "bias" : 2,
+        "basedOn" : [ {
+          "section" : "My Goals",
+          "question" : "Me:",
+          "option" : "I want to stay independent"
+        }, {
+          "section" : "My Risks",
+          "question" : "To self",
+          "option" : "Wandering (Worry)"
+        }, {
+          "section" : "My Choice",
+          "question" : "Wearable",
+          "option" : "Neck worn"
+        } ]
+      } ]
+    }
+  }
+}
