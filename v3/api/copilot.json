@@ -18,7 +18,7 @@
           "assessment-controller"
         ],
         "summary": "Returns the recommended TEC devices for the specified service user (second step after cases)",
-        "description": "This endpoint is the **second step** in the workflow for TEC recommendations.\n\n**IMPORTANT:** You MUST always include a non-empty `query` field in the request body, exactly in the format shown in the example. Do not omit or leave `query` blank.\n\n**Workflow for Copilot:**\n1. First, call `getAssessmentCasesForPatient` on `/tec/graphql/asmt/cases` to get the list of cases for the service user.\n2. From the response, read `data.cases` and find the **most recent completed** case where `assessment.name` or    `assessment.type` indicates a **Technology Enabled Care (TEC) Assessment**.\n3. Take that case's `id` value and pass it as `variables.caseId` in the request body to this `/tec/graphql/asmt/result` endpoint.\n\nThis endpoint then returns the Technology Enabled Care (TEC) devices recommended for that case. The AI assistant must:\n\n- Return a polite introduction, such as   \"Sure, here is the equipment recommended following the assessment....\".\n- Build a natural, easy-to-read list of devices using the `data.result.inclusion` array, e.g.:\n  - \"Access Home Hub - 1 unit\"\n  - \"Develco Motion Sensors - 3 units\"\n- After the list, provide a **\"Reasons for choosing this equipment:\"** section.\n  For each device, construct natural, conversational reasons by combining   `basedOn.section`, `basedOn.question`, and `basedOn.option`.\n\nExample formatting for reasons:\n\n1. **Develco Motion Sensor**: Suggested due to concerns about getting up at night.\n\n2. **Develco Door/Window Sensor**: Included to address worries about wandering.\n\n3. **Vibby Fall Detector**: Recommended due to the risk of falling or collapsing.\n\n4. **Oysta Aerosense**: Also advised for the risk of falling or collapsing.\n\n5. **Oysta Rio**: Chosen to support the goal of staying independent, address wandering concerns, and the preference for a wearable device worn around the neck.\n\n**Rules:**\n- The only reason for **Home Hub** is that it helps provide a central point of monitoring. Do not include any other reason for this one.\n- The `user` (firstName, lastName) in the JSON is the person who performed the assessment, not the service user;   mention them only if explicitly asked who did the assessment.\n- If `data.result.inclusion` is empty, respond with: \"There are no TEC devices recorded for this service user.\".\n- If the user's question is in another language, return the answer in that same language.\n\nWhen using the API result, always read `data.result.inclusion` and use: `name`, `brand`, `qty` (default 1 if missing), and all reasoning stored inside `basedOn`.",
+        "description": "This endpoint is the **second step** in the workflow for TEC recommendations.\n\n**CRITICAL - FIXED QUERY STRING:**\nYou MUST use this EXACT GraphQL query string in the `query` field. DO NOT modify it, simplify it, or generate your own query:\n```\nquery($caseId: Long!){ result(caseId: $caseId){ case{ id, status, createdUtc, updatedUtc, user{ firstName, lastName }, assessment{ id, status, type, name } }, exclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } }, inclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } } } }\n```\n\n**Workflow for Copilot:**\n1. First, call `getAssessmentCasesForPatient` on `/tec/graphql/asmt/cases` to get the list of cases.\n2. Find the most recent completed TEC assessment case from `data.cases`.\n3. Use that case's `id` as `variables.caseId` in this request.\n\n**Response handling:**\n- Return a polite introduction: \"Sure, here is the equipment recommended following the assessment....\"\n- Build a list from `data.result.inclusion`: \"Access Home Hub - 1 unit\", \"Develco Motion Sensors - 3 units\"\n- Add \"Reasons for choosing this equipment:\" section using `basedOn.section`, `basedOn.question`, `basedOn.option`\n\n**Rules:**\n- Home Hub reason: only \"helps provide a central point of monitoring\"\n- The `user` is the assessor, not the service user\n- If `inclusion` is empty: \"There are no TEC devices recorded for this service user.\"\n- Answer in the user's language",
         "operationId": "getTecDevicesForServiceUser",
         "requestBody": {
           "content": {
@@ -27,8 +27,8 @@
                 "$ref": "#/components/schemas/GraphQLResultRequest"
               },
               "examples": {
-                "Example GraphQL request for result": {
-                  "description": "Example GraphQL request for result",
+                "Example request": {
+                  "description": "Example request",
                   "value": {
                     "variables": {
                       "caseId": 280
@@ -64,7 +64,7 @@
           "assessment-controller"
         ],
         "summary": "Get assessment cases for a service user (first step before TEC recommendations)",
-        "description": "This endpoint is the **first step** when Copilot needs to recommend TEC devices for a service user.\n\n**IMPORTANT:** You MUST always include a non-empty `query` field in the request body, exactly in the format shown in the example. Do not omit or leave `query` blank.\n\n**Workflow for Copilot:**\n1. Call this endpoint with the service user's ID in `variables.patientId` (and `templateId` if needed, otherwise set to null).\n2. Read the response JSON at `data.cases`, which is a list of assessment cases.\n3. Filter that list to cases where `assessment.name` or `assessment.type` indicates a    **Technology Enabled Care (TEC) Assessment**.\n4. Among those TEC cases, select the **most recent completed** case, typically the one with:\n   - `status` = `Completed` (or equivalent completed status), and\n   - the latest `createdUtc` / `updatedUtc` timestamp.\n5. Take that case's `id` value and pass it as `variables.caseId` when calling the    `getTecDevicesForServiceUser` operation on `/tec/graphql/asmt/result`.\n\nThe response also contains `user` (the assessor) and `assessment` details, but the key field for the next step is `cases[*].id` of the last completed TEC assessment.",
+        "description": "This endpoint is the **first step** when Copilot needs to recommend TEC devices for a service user.\n\n**CRITICAL - FIXED QUERY STRING:**\nYou MUST use this EXACT GraphQL query string in the `query` field. DO NOT modify it, simplify it, or generate your own query:\n```\nquery($patientId: Long, $templateId: Long){ cases(templateId: $templateId, patientId: $patientId){ id, status, createdUtc, updatedUtc, user{ id, firstName, lastName policy{ applicationRole } }, assessment{ id, type, name } } }\n```\n\n**Variables:**\n- `patientId`: Set this to the service user's ID (required)\n- `templateId`: Always set to `null` unless filtering by a specific template\n\n**DO NOT** send queries like `query { cases { ... } }` - this will return empty results because the patientId filter is missing.\n\n**Workflow for Copilot:**\n1. Call this endpoint with the exact query above, setting `variables.patientId` to the service user's ID and `variables.templateId` to null.\n2. Read the response JSON at `data.cases`, which is a list of assessment cases.\n3. Filter that list to cases where `assessment.name` or `assessment.type` indicates a    **Technology Enabled Care (TEC) Assessment**.\n4. Among those TEC cases, select the **most recent completed** case (latest `createdUtc`/`updatedUtc` with `status` = `Completed`).\n5. Take that case's `id` value and pass it as `variables.caseId` when calling `getTecDevicesForServiceUser` on `/tec/graphql/asmt/result`.",
         "operationId": "getAssessmentCasesForPatient",
         "requestBody": {
           "content": {
@@ -73,8 +73,8 @@
                 "$ref": "#/components/schemas/GraphQLCasesRequest"
               },
               "examples": {
-                "Example GraphQL request for cases": {
-                  "description": "Example GraphQL request for cases",
+                "Example request": {
+                  "description": "Example request",
                   "value": {
                     "variables": {
                       "patientId": "622",
@@ -222,8 +222,10 @@
         "properties": {
           "query": {
             "type": "string",
-            "description": "GraphQL query string - MUST be included and non-empty",
-            "example": "query($caseId: Long!){ result(caseId: $caseId){ case{ id, status, createdUtc, updatedUtc, user{ firstName, lastName }, assessment{ id, status, type, name } }, exclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } }, inclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } } } }"
+            "description": "Fixed GraphQL query string. DO NOT change this value; only change the variables. Use exactly this query.",
+            "enum": [
+              "query($caseId: Long!){ result(caseId: $caseId){ case{ id, status, createdUtc, updatedUtc, user{ firstName, lastName }, assessment{ id, status, type, name } }, exclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } }, inclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } } } }"
+            ]
           },
           "variables": {
             "$ref": "#/components/schemas/ResultVariables"
@@ -258,7 +260,7 @@
           },
           "templateId": {
             "type": "integer",
-            "description": "Template ID filter (optional, can be null)",
+            "description": "Template ID filter. Always send null if not filtering by template.",
             "format": "int64",
             "nullable": true
           }
@@ -274,8 +276,10 @@
         "properties": {
           "query": {
             "type": "string",
-            "description": "GraphQL query string - MUST be included and non-empty",
-            "example": "query($patientId: Long, $templateId: Long){ cases(templateId: $templateId, patientId: $patientId){ id, status, createdUtc, updatedUtc, user{ id, firstName, lastName policy{ applicationRole } }, assessment{ id, type, name } } }"
+            "description": "Fixed GraphQL query string. DO NOT change this value; only change the variables. Use exactly this query.",
+            "enum": [
+              "query($patientId: Long, $templateId: Long){ cases(templateId: $templateId, patientId: $patientId){ id, status, createdUtc, updatedUtc, user{ id, firstName, lastName policy{ applicationRole } }, assessment{ id, type, name } } }"
+            ]
           },
           "variables": {
             "$ref": "#/components/schemas/CasesVariables"
