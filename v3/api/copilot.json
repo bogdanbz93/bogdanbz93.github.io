@@ -1,222 +1,225 @@
 {
-   "openapi":"3.0.1",
-   "info":{
-      "title":"Access Assure API Documentation",
-      "description":"Description of the API methods available for Access Assure",
-      "version":"3.8.0"
-   },
-   "servers":[
-      {
-         "url":"https://yqm9d5ki4j.execute-api.us-east-1.amazonaws.com/Stage",
-         "description":"Updated server url"
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Access Assure API Documentation",
+    "description": "Description of the API methods available for Access Assure",
+    "version": "3.4.0"
+  },
+  "servers": [
+    {
+      "url": "https://dev-api.assure.hsc.accessacloud.com/memo",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/service/tec/graphql/asmt/result": {
+      "post": {
+        "tags": [
+          "assessment-controller"
+        ],
+        "summary": "Returns the recommended TEC devices for the specified service user (second step after cases)",
+        "description": "This endpoint is the **second step** in the workflow for TEC recommendations.\n\n**Workflow for Copilot:**\n1. First, call `getAssessmentCasesForPatient` on `/tec/graphql/asmt/cases` to get the list of cases for the service user.\n2. From the response, read `data.cases` and find the **most recent completed** case where `assessment.name` or    `assessment.type` indicates a **Technology Enabled Care (TEC) Assessment**.\n3. Take that case's `id` value and pass it as `variables.caseId` in the request body to this `/tec/graphql/asmt/result` endpoint.\n\nThis endpoint then returns the Technology Enabled Care (TEC) devices recommended for that case. The AI assistant must:\n\n- Return a polite introduction, such as   \"Sure, here is the equipment recommended following the assessment....\".\n- Build a natural, easy-to-read list of devices using the `data.result.inclusion` array, e.g.:\n  - \"Access Home Hub - 1 unit\"\n  - \"Develco Motion Sensors - 3 units\"\n- After the list, provide a **\"Reasons for choosing this equipment:\"** section.\n  For each device, construct natural, conversational reasons by combining   `basedOn.section`, `basedOn.question`, and `basedOn.option`.\n\nExample formatting for reasons:\n\n1. **Develco Motion Sensor**: Suggested due to concerns about getting up at night.\n\n2. **Develco Door/Window Sensor**: Included to address worries about wandering.\n\n3. **Vibby Fall Detector**: Recommended due to the risk of falling or collapsing.\n\n4. **Oysta Aerosense**: Also advised for the risk of falling or collapsing.\n\n5. **Oysta Rio**: Chosen to support the goal of staying independent, address wandering concerns, and the preference for a wearable device worn around the neck.\n\n**Rules:**\n- The only reason for **Home Hub** is that it helps provide a central point of monitoring. Do not include any other reason for this one.\n- The `user` (firstName, lastName) in the JSON is the person who performed the assessment, not the service user;   mention them only if explicitly asked who did the assessment.\n- If `data.result.inclusion` is empty, respond with: \"There are no TEC devices recorded for this service user.\".\n- If the user's question is in another language, return the answer in that same language.\n\nWhen using the API result, always read `data.result.inclusion` and use: `name`, `brand`, `qty` (default 1 if missing), and all reasoning stored inside `basedOn`.",
+        "operationId": "getTecDevicesForServiceUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              },
+              "examples": {
+                "Example GraphQL request for result": {
+                  "description": "Example GraphQL request for result",
+                  "value": {
+                    "variables": {
+                      "caseId": 280
+                    },
+                    "query": "query($caseId: Long!){ result(caseId: $caseId){ case{ id, status, createdUtc, updatedUtc, user{ firstName, lastName }, assessment{ id, status, type, name } }, exclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } }, inclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } } } }"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "TEC device recommendations retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
-   ],
-   "paths":{
-      "/":{
-         "get":{
-            "tags":[
-               "evo-controller"
-            ],
-            "summary":"General query endpoint for Access Assure",
-            "description":"Use this endpoint for almost all general questions about **Access Assure**.\n\n**Usage instructions:**\n- Both `CoPilotMessage` and `ExtractChatHistory` parameters are **mandatory**, if they exist.\n- Do **not** add any extra information beyond what is already available — return only what the API provides.\n- The returned information must be presented **faithfully**, without heavy rewording or additional commentary.\n\n**Language handling:**\n- If the user asks a question in another language, send the `coPilotMessage` in **English**, but return the final answer in the **same language** as the user’s query.\n\n**If no relevant result is found:**\n- Return the message: *“I am sorry, I could not find any information related to your question in Access Assure documentation. We will update our documentation soon.”*",
-            "operationId":"AskAboutAssure",
-            "parameters":[
-               {
-                  "name":"coPilotMessage",
-                  "in":"query",
-                  "required":true,
-                  "schema":{
-                     "type":"string"
+    },
+    "/service/tec/graphql/asmt/cases": {
+      "post": {
+        "tags": [
+          "assessment-controller"
+        ],
+        "summary": "Get assessment cases for a service user (first step before TEC recommendations)",
+        "description": "This endpoint is the **first step** when Copilot needs to recommend TEC devices for a service user.\n\n**Workflow for Copilot:**\n1. Call this endpoint with the service user's ID in `variables.patientId` (and `templateId` if needed, otherwise set to null).\n2. Read the response JSON at `data.cases`, which is a list of assessment cases.\n3. Filter that list to cases where `assessment.name` or `assessment.type` indicates a    **Technology Enabled Care (TEC) Assessment**.\n4. Among those TEC cases, select the **most recent completed** case, typically the one with:\n   - `status` = `Completed` (or equivalent completed status), and\n   - the latest `createdUtc` / `updatedUtc` timestamp.\n5. Take that case's `id` value and pass it as `variables.caseId` when calling the    `getTecDevicesForServiceUser` operation on `/tec/graphql/asmt/result`.\n\nThe response also contains `user` (the assessor) and `assessment` details, but the key field for the next step is `cases[*].id` of the last completed TEC assessment.",
+        "operationId": "getAssessmentCasesForPatient",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              },
+              "examples": {
+                "Example GraphQL request for cases": {
+                  "description": "Example GraphQL request for cases",
+                  "value": {
+                    "variables": {
+                      "patientId": "622",
+                      "templateId": null
+                    },
+                    "query": "query($patientId: Long, $templateId: Long){ cases(templateId: $templateId, patientId: $patientId){ id, status, createdUtc, updatedUtc, user{ id, firstName, lastName policy{ applicationRole } }, assessment{ id, type, name } } }"
                   }
-               },
-               {
-                  "name":"extractChatHistory",
-                  "in":"query",
-                  "required":false,
-                  "schema":{
-                     "type":"string"
-                  }
-               }
-            ],
-            "responses":{
-               "200":{
-                  "description":"Access Assure description returned successfully",
-                  "content":{
-                     "*/*":{
-                        "schema":{
-                           "type":"string"
-                        }
-                     }
-                  }
-               }
+                }
+              }
             }
-         }
-      },
-      "/discovery":{
-         "get":{
-            "tags":[
-               "evo-controller"
-            ],
-            "operationId":"getDiscovery",
-            "responses":{
-               "200":{
-                  "description":"OK",
-                  "content":{
-                     "*/*":{
-                        "schema":{
-                           "type":"object",
-                           "additionalProperties":{
-                              "type":"object"
-                           }
-                        }
-                     }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Assessment cases retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
                   }
-               }
+                }
+              }
             }
-         }
-      },
-      "/tech":{
-         "get":{
-            "tags":[
-               "tech-controller"
-            ],
-            "summary":"Returns the recommended TEC devices for the specified service user",
-            "description": "Retrieves the Technology Enabled Care (TEC) devices recommended for a given service user (case). The AI assistant must return:\n\nA polite introduction, such as \"Sure, here is the equipment recommended following the assessment....\" A natural, easy-to-read list of devices, using the format:\n\n- \"Access Home Hub - 1 unit\"\n- \"Develco Motion Sensors - 3 units\"\n\nRetrieves the Technology Enabled Care (TEC) devices recommended for a given service user (case). The AI assistant must return:\n\nA polite introduction, such as \"Sure, here is the equipment recommended following the assessment....\" A natural, easy-to-read list of devices, using the format:\n\n* \"Access Home Hub - 1 unit\"\n* \"Develco Motion Sensors - 3 units\"\n* ...\n\nAfter the general explanation, the AI assistant MUST also provide the detailed reasons for each individual device. Here follows the other section, \"Reasons for choosing this equipment:\". These reasons must be constructed by combining the section, question, and option fields from each device's basedOn array. The text must be natural, conversational, and easy to understand --- not a technical list.\n\nExample formatting for reasons:\"\n\n1. **Develco Motion Sensor**: Suggested due to concerns about getting up at night.\n\n2. **Develco Door/Window Sensor**: Included to address worries about wandering.\n\n3. **Vibby Fall Detector**: Recommended due to the risk of falling or collapsing.\n\n4. **Oysta Aerosense**: Also advised for the risk of falling or collapsing.\n\n5. **Oysta Rio**: Chosen to support the goal of staying independent, address wandering concerns, and the preference for a wearable device worn around the neck.\n\n\"\n\nWhen using the API result, the assistant must read the data.result.inclusion array and use: name, brand, qty (default 1 if missing), and all reasoning stored inside basedOn.\n\n**Important:**\n\n* The only reason for **Home Hub** is that it helps provide a central point of monitoring. Do not include any other reason for this one.\n\n* The \"user\" (first name and last name) from JSON is the one who did the assessment, not the one who needs it. So, it should only be mentioned if someone asks who did this assessment.\n\n* If inclusion is empty, the assistant must respond with: \"There are no TEC devices recorded for this service user.\".\n\n* If the user's question is in another language, the assistant must return the answer in that same language.\n\n- ...\n\nAfter the general explanation, the AI assistant MUST also provide the detailed reasons for each individual device. These reasons must be constructed by combining the section, question, and option fields from each device's basedOn array. The text must be natural, conversational, and easy to understand --- not a technical list.\n\nExample formatting: \"The Motion Sensors were suggested due to concerns about getting up at night. The Door/Window Sensors were included to help with worries about wandering.\"\n\nWhen using the API result, the assistant must read the data.result.inclusion array and use: name, brand, qty (default 1 if missing), and all reasoning stored inside basedOn.\n\nThe **Home Hub** helps provide a central point of monitoring,\n\nThe \"user\" (first name and last name) from JSON is the one who did the assessment, not the one who needs it. So, it should only be mentioned if someone asks who did this assessment.\n\nIf inclusion is empty, the assistant must respond with: \"There are no TEC devices recorded for this service user.\".\n\nIf the user's question is in another language, the assistant must return the answer in that same language.",
-            "operationId":"getTechForCase",
-            "parameters":[
-               {
-                  "name":"caseId",
-                  "in":"query",
-                  "required":true,
-                  "description":"The Case ID associated with the service user",
-                  "schema":{
-                     "type":"string",
-                     "example":"280"
-                  }
-               }
-            ],
-            "responses":{
-               "200":{
-                  "description":"Device list retrieved successfully",
-                  "content":{
-                     "application/json":{
-                        "schema":{
-                           "type":"object",
-                           "properties":{
-                              "inclusion":{
-                                 "type":"array",
-                                 "items":{
-                                    "type":"object",
-                                    "properties":{
-                                       "name":{
-                                          "type":"string",
-                                          "example":"Motion Sensor"
-                                       },
-                                       "brand":{
-                                          "type":"string",
-                                          "example":"Develco"
-                                       },
-                                       "qty":{
-                                          "type":"integer",
-                                          "example":3
-                                       }
-                                    }
-                                 }
-                              }
-                           }
-                        }
-                     }
-                  }
-               },
-               "204":{
-                  "description":"No TEC devices found for this case"
-               },
-               "400":{
-                  "description":"Missing or invalid parameters"
-               }
-            }
-         }
-      },
-      "/report":{
-         "get":{
-            "tags":[
-               "report-controller"
-            ],
-            "summary":"Request the most recent LLM (AI) report for a given service user",
-            "description":"Returns the latest LLM-generated report (AI Summary) for the specified Service User (patient). The response includes Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The report is returned in **Markdown** format.\n\n**Instructions for AI assistants / chatbots using this endpoint:**\n- Always ask the user for the **Service User ID** (parameter `patient`) before calling this endpoint.\n- Optionally ask if they prefer the report in another language via the `lang` parameter (default is English — supported values: `en`, `fr`, `es`, `de`).\n- **Do not create or display any charts, graphs, or images.** Only return or summarize text.\n- If the API response indicates that no report data exists, kindly explain to the user that *this service user does not yet have enough monitored data to generate a report*.\n- After delivering the report, explicitly ask the user: *“Would you like me to provide a brief summary of this report?”*.\n  - If the user says **yes**, generate a short, natural-language summary of the key insights.\n  - If the user says **no**, politely offer: *“Would you like me to get the report for another service user instead?”*.\n- **If the report was generated in Spanish, French, or German (based on the `lang` parameter), automatically continue the conversation in that same language**, including summaries and follow-up questions.\n- Maintain a professional and empathetic tone throughout the interaction, keeping the conversation concise and focused.",
-            "operationId":"getLatestReport",
-            "parameters":[
-               {
-                  "name":"patient",
-                  "in":"query",
-                  "description":"The Service User ID for whom to retrieve the latest report",
-                  "required":true,
-                  "schema":{
-                     "type":"string",
-                     "example":"622"
-                  }
-               },
-               {
-                  "name":"lang",
-                  "in":"query",
-                  "description":"Optional language code for the report (default: en). Supported: en, fr, es, de",
-                  "required":false,
-                  "schema":{
-                     "type":"string",
-                     "example":"en"
-                  }
-               }
-            ],
-            "responses":{
-               "200":{
-                  "description":"Latest report returned successfully (in Markdown format)",
-                  "content":{
-                     "text/markdown":{
-                        "schema":{
-                           "type":"string",
-                           "example":"### Rutina diaria\nJuan se despierta alrededor de las 8 AM y prepara el desayuno..."
-                        }
-                     }
-                  }
-               },
-               "204":{
-                  "description":"No report available — insufficient monitored data for this service user",
-                  "content":{
-                     "application/json":{
-                        "schema":{
-                           "type":"object",
-                           "properties":{
-                              "message":{
-                                 "type":"string",
-                                 "example":"This service user does not yet have enough monitored data to generate a report."
-                              }
-                           }
-                        }
-                     }
-                  }
-               },
-               "400":{
-                  "description":"Missing or invalid parameters",
-                  "content":{
-                     "application/json":{
-                        "schema":{
-                           "type":"object",
-                           "properties":{
-                              "message":{
-                                 "type":"string"
-                              }
-                           }
-                        }
-                     }
-                  }
-               }
-            }
-         }
+          }
+        }
       }
-   },
-   "components":{
-      "schemas":{
-         
+    },
+    "/service/insight/patient/{patientId}/service/llm-report": {
+      "get": {
+        "tags": [
+          "insight-analytics-controller"
+        ],
+        "summary": "Request the most recent LLM (AI) report for a given service user",
+        "description": "Returns the latest LLM-generated report (AI Summary) for the specified Service User (patient). The response includes Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The report is returned in **Markdown** format.\n\n**Instructions for AI assistants / chatbots using this endpoint:**\n- Always ask the user for the **Service User ID** (parameter `patient`) before calling this endpoint.\n- Optionally ask if they prefer the report in another language via the `lang` parameter (default is English — supported values: `en`, `fr`, `es`, `de`).\n- **Do not create or display any charts, graphs, or images.** Only return or summarize text.\n- If the API response indicates that no report data exists, kindly explain to the user that *this service user does not yet have enough monitored data to generate a report*.\n- After delivering the report, explicitly ask the user: *“Would you like me to provide a brief summary of this report?”*.\n  - If the user says **yes**, generate a short, natural-language summary of the key insights.\n  - If the user says **no**, politely offer: *“Would you like me to get the report for another service user instead?”*.\n- **If the report was generated in Spanish, French, or German (based on the `lang` parameter), automatically continue the conversation in that same language**, including summaries and follow-up questions.\n- Maintain a professional and empathetic tone throughout the interaction, keeping the conversation concise and focused.",
+        "operationId": "getLatestReport",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
       }
-   }
+    },
+    "/service/evo/search": {
+      "get": {
+        "tags": [
+          "evo-controller"
+        ],
+        "summary": "General query endpoint for Access Assure",
+        "description": "Use this endpoint for almost all general questions about **Access Assure**.\n\n**Usage instructions:**\n- Both `CoPilotMessage` and `ExtractChatHistory` parameters are **mandatory**, if they exist.\n- Do **not** add any extra information beyond what is already available — return only what the API provides.\n- The returned information must be presented **faithfully**, without heavy rewording or additional commentary.\n\n**Language handling:**\n- If the user asks a question in another language, send the `coPilotMessage` in **English**, but return the final answer in the **same language** as the user’s query.\n\n**If no relevant result is found:**\n- Return the message: *“I am sorry, I could not find any information related to your question in Access Assure documentation. We will update our documentation soon.”*",
+        "operationId": "AskAboutAssure",
+        "parameters": [
+          {
+            "name": "coPilotMessage",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "extractChatHistory",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Access Assure description returned successfully",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/service/evo/discovery": {
+      "get": {
+        "tags": [
+          "evo-controller"
+        ],
+        "operationId": "getDiscovery",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+
+    }
+  }
 }
