@@ -18,7 +18,7 @@
           "assessment-controller"
         ],
         "summary": "Returns the recommended TEC devices for the specified service user (second step after cases)",
-        "description": "This endpoint is the **second step** in the workflow for TEC recommendations. Whenever 'createdUtc', 'updatedUtc' or any timestamp/UTC appears in the data, interpret and present it in natural language not as raw UTC or technical timestamps. Those are Unix Timestamps, you have to convert those to GMT (for example: 1744820469 it's Wed Apr 16 2025 16:21:09 GMT+0000).\n\n**CRITICAL - FIXED QUERY STRING:**\nYou MUST use this EXACT GraphQL query string in the `query` field. DO NOT modify it, simplify it, or generate your own query:\n```\nquery($caseId: Long!){ result(caseId: $caseId){ case{ id, status, createdUtc, updatedUtc, user{ firstName, lastName }, assessment{ id, status, type, name } }, exclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } }, inclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } } } }\n```\n\n**Workflow for Copilot:**\n1. First, call `getAssessmentCasesForPatient` on `/tec/graphql/asmt/cases` to get the list of cases.\n2. Find the most recent completed TEC assessment case from `data.cases`.\n3. Use that case's `id` as `variables.caseId` in this request.\n\n**RESPONSE FORMAT - FOLLOW THIS EXACT STRUCTURE:**\n\n```\nSure, here is the equipment recommended following the assessment:\n\n*   [Brand] [Name] - [qty] unit(s)\n*   [Brand] [Name] - [qty] unit(s)\n... (list all devices from data.result.inclusion)\n\n### Reasons for choosing this equipment:\n\n1.  **[Brand] [Name]**: [Natural language reason]\n2.  **[Brand] [Name] and [Brand] [Name]**: [Shared reason if they have the same basedOn]\n... (numbered list)\n```\n\n**FORMATTING RULES:**\n1. **ALWAYS include the brand**: Use '[brand] [name]' format (e.g., 'Develco Motion Sensor', 'Vibby Fall Detector', 'Oysta Aerosense', 'Access Home Hub')\n2. First section: List ALL devices with bullet points (*) showing brand, name, and quantity\n3. Second section: Use heading '### Reasons for choosing this equipment:'\n4. **GROUP devices with the SAME reason together**: If multiple devices share the same basedOn reason, combine them in ONE numbered entry:\n   - WRONG: '4. **Vibby Fall Detector**: Recommended due to risk of falling. 5. **Oysta Aerosense**: Recommended due to risk of falling.'\n   - CORRECT: '4. **Vibby Fall Detector and Oysta Aerosense**: Recommended due to the risk of falling or collapsing.'\n5. Reasons section: Numbered list (1., 2., 3...) with device name(s) in **bold**\n6. Convert `basedOn` data into natural, conversational sentences:\n   - 'My Risks: To self: Getting up at night' → 'Suggested due to concerns about getting up at night'\n   - 'My Risks: To self: Wandering (Worry)' → 'Included to address worries about wandering'\n   - 'My Risks: To self: Fall / Collapse' → 'Recommended due to the risk of falling or collapsing'\n   - 'My Goals: Me: I want to stay independent' → 'Chosen to support the goal of staying independent'\n   - 'My Choice: Wearable: Neck worn' → 'the preference for a wearable device worn around the neck'\n7. If a device has multiple reasons, combine them: 'Chosen to support staying independent, address wandering concerns, and the preference for a neck-worn wearable'\n\n**SPECIAL RULES:**\n- **Access Home Hub**: The ONLY reason is 'Helps provide a central point of monitoring' - ignore any basedOn data\n- The `user` (firstName, lastName) is the assessor, NOT the service user - only mention if explicitly asked\n- If `data.result.inclusion` is empty: respond with 'There are no TEC devices recorded for this service user.'\n- Answer in the same language as the user's question\n\n**EXAMPLE OUTPUT:**\n```\nSure, here is the equipment recommended following the assessment:\n\n*   Access Home Hub - 1 unit\n*   Develco Motion Sensor - 3 units\n*   Develco Door/Window Sensor - 2 units\n*   Vibby Fall Detector - 1 unit\n*   Oysta Aerosense - 1 unit\n*   Oysta Rio - 1 unit\n\n### Reasons for choosing this equipment:\n\n1.  **Access Home Hub**: Helps provide a central point of monitoring.\n2.  **Develco Motion Sensor**: Suggested due to concerns about getting up at night.\n3.  **Develco Door/Window Sensor**: Included to address worries about wandering.\n4.  **Vibby Fall Detector and Oysta Aerosense**: Recommended due to the risk of falling or collapsing.\n5.  **Oysta Rio**: Chosen to support the goal of staying independent, address wandering concerns, and the preference for a wearable device worn around the neck.\n```",
+        "description": "This endpoint is the **second step** in the workflow for TEC recommendations.\n\n**CRITICAL - FIXED QUERY STRING:**\nYou MUST use this EXACT GraphQL query string in the `query` field. DO NOT modify it, simplify it, or generate your own query:\n```\nquery($caseId: Long!){ result(caseId: $caseId){ case{ id, status, createdUtc, updatedUtc, user{ firstName, lastName }, assessment{ id, status, type, name } }, exclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } }, inclusion{ techId, brand, name, bias, qty, basedOn{ section, question, option } } } }\n```\n\n**Workflow for Copilot:**\n1. First, call `getAssessmentCasesForPatient` on `/tec/graphql/asmt/cases` to get the list of cases.\n2. Find the most recent completed TEC assessment case from `data.cases`.\n3. Use that case's `id` as `variables.caseId` in this request.\n\n**RESPONSE FORMAT - FOLLOW THIS EXACT STRUCTURE:**\n\n```\nSure, here is the equipment recommended following the assessment:\n\n*   [Brand] [Name] - [qty] unit(s)\n*   [Brand] [Name] - [qty] unit(s)\n... (list all devices from data.result.inclusion)\n\n### Reasons for choosing this equipment:\n\n1.  **[Brand] [Name]**: [Natural language reason]\n2.  **[Brand] [Name] and [Brand] [Name]**: [Shared reason if they have the same basedOn]\n... (numbered list)\n```\n\n**FORMATTING RULES:**\n1. **ALWAYS include the brand**: Use '[brand] [name]' format (e.g., 'Develco Motion Sensor', 'Vibby Fall Detector', 'Oysta Aerosense', 'Access Home Hub')\n2. First section: List ALL devices with bullet points (*) showing brand, name, and quantity\n3. Second section: Use heading '### Reasons for choosing this equipment:'\n4. **GROUP devices with the SAME reason together**: If multiple devices share the same basedOn reason, combine them in ONE numbered entry:\n   - WRONG: '4. **Vibby Fall Detector**: Recommended due to risk of falling. 5. **Oysta Aerosense**: Recommended due to risk of falling.'\n   - CORRECT: '4. **Vibby Fall Detector and Oysta Aerosense**: Recommended due to the risk of falling or collapsing.'\n5. Reasons section: Numbered list (1., 2., 3...) with device name(s) in **bold**\n6. Convert `basedOn` data into natural, conversational sentences:\n   - 'My Risks: To self: Getting up at night' → 'Suggested due to concerns about getting up at night'\n   - 'My Risks: To self: Wandering (Worry)' → 'Included to address worries about wandering'\n   - 'My Risks: To self: Fall / Collapse' → 'Recommended due to the risk of falling or collapsing'\n   - 'My Goals: Me: I want to stay independent' → 'Chosen to support the goal of staying independent'\n   - 'My Choice: Wearable: Neck worn' → 'the preference for a wearable device worn around the neck'\n7. If a device has multiple reasons, combine them: 'Chosen to support staying independent, address wandering concerns, and the preference for a neck-worn wearable'\n\n**SPECIAL RULES:**\n- **Access Home Hub**: The ONLY reason is 'Helps provide a central point of monitoring' - ignore any basedOn data\n- The `user` (firstName, lastName) is the assessor, NOT the service user - only mention if explicitly asked\n- If `data.result.inclusion` is empty: respond with 'There are no TEC devices recorded for this service user.'\n- Answer in the same language as the user's question\n\n**EXAMPLE OUTPUT:**\n```\nSure, here is the equipment recommended following the assessment:\n\n*   Access Home Hub - 1 unit\n*   Develco Motion Sensor - 3 units\n*   Develco Door/Window Sensor - 2 units\n*   Vibby Fall Detector - 1 unit\n*   Oysta Aerosense - 1 unit\n*   Oysta Rio - 1 unit\n\n### Reasons for choosing this equipment:\n\n1.  **Access Home Hub**: Helps provide a central point of monitoring.\n2.  **Develco Motion Sensor**: Suggested due to concerns about getting up at night.\n3.  **Develco Door/Window Sensor**: Included to address worries about wandering.\n4.  **Vibby Fall Detector and Oysta Aerosense**: Recommended due to the risk of falling or collapsing.\n5.  **Oysta Rio**: Chosen to support the goal of staying independent, address wandering concerns, and the preference for a wearable device worn around the neck.\n```",
         "operationId": "getTecDevicesForServiceUser",
         "requestBody": {
           "content": {
@@ -64,7 +64,7 @@
           "assessment-controller"
         ],
         "summary": "Get assessment cases for a service user (first step before TEC recommendations)",
-        "description": "This endpoint is the **first step** when Copilot needs to recommend TEC devices for a service user.\n\n**CRITICAL - FIXED QUERY STRING:**\nYou MUST use this EXACT GraphQL query string in the `query` field. DO NOT modify it, simplify it, or generate your own query:\n```\nquery($patientId: Long, $templateId: Long){ cases(templateId: $templateId, patientId: $patientId){ id, status, createdUtc, updatedUtc, user{ id, firstName, lastName policy{ applicationRole } }, assessment{ id, type, name } } }\n```\n\n**Variables:**\n- `patientId`: Set this to the service user's ID (required)\n- `templateId`: Always set to `null` unless filtering by a specific template\n\n**DO NOT** send queries like `query { cases { ... } }` - this will return empty results because the patientId filter is missing.\n\n**Workflow for Copilot:**\n1. Call this endpoint with the exact query above, setting `variables.patientId` to the service user's ID and `variables.templateId` to null.\n2. Read the response JSON at `data.cases`, which is a list of assessment cases.\n3. Filter that list to cases where `assessment.name` or `assessment.type` indicates a    **Technology Enabled Care (TEC) Assessment**.\n4. Among those TEC cases, select the **most recent completed** case (latest `createdUtc`/`updatedUtc` with `status` = `Completed`).\n5. Take that case's `id` value and pass it as `variables.caseId` when calling `getTecDevicesForServiceUser` on `/tec/graphql/asmt/result`.",
+        "description": "This endpoint is the **first step** when Copilot needs to recommend TEC devices for a service user.\n\n**CRITICAL - FIXED QUERY STRING:**\nYou MUST use this EXACT GraphQL query string in the `query` field. DO NOT modify it, simplify it, or generate your own query:\n```\nquery($patientId: Long, $templateId: Long){ cases(templateId: $templateId, patientId: $patientId){ id, status, createdUtc, updatedUtc, user{ id, firstName, lastName policy{ applicationRole } }, assessment{ id, type, name } } }\n```\n\nIf there is no data available or is empty, you can inform them that either no assessments have been completed yet, or they do not have permission to access this service user's information. \n\n**Variables:**\n- `patientId`: Set this to the service user's ID (required)\n- `templateId`: Always set to `null` unless filtering by a specific template\n\n**DO NOT** send queries like `query { cases { ... } }` - this will return empty results because the patientId filter is missing.\n\n**Workflow for Copilot:**\n1. Call this endpoint with the exact query above, setting `variables.patientId` to the service user's ID and `variables.templateId` to null.\n2. Read the response JSON at `data.cases`, which is a list of assessment cases.\n3. Filter that list to cases where `assessment.name` or `assessment.type` indicates a    **Technology Enabled Care (TEC) Assessment**.\n4. Among those TEC cases, select the **most recent completed** case (latest `createdUtc`/`updatedUtc` with `status` = `Completed`).\n5. Take that case's `id` value and pass it as `variables.caseId` when calling `getTecDevicesForServiceUser` on `/tec/graphql/asmt/result`.",
         "operationId": "getAssessmentCasesForPatient",
         "requestBody": {
           "content": {
@@ -105,13 +105,56 @@
         }
       }
     },
+    "/service/graphql/connect/admin/query": {
+      "post": {
+        "tags": [
+          "graph-admin-controller"
+        ],
+        "summary": "Look up service users (patients) by name to find their ID",
+        "description": "**USE THIS ENDPOINT FIRST** when the user mentions a service user by name but you need their ID for other API calls.\n\n**WHEN TO USE THIS:**\n- User says 'Show me alerts for John Smith' → Use this to find John Smith's patient ID first\n- User says 'What equipment does Mary Jones have?' → Look up Mary Jones's ID first\n- User provides a name instead of an ID → Always resolve the name to ID using this endpoint\n\n**CRITICAL - FIXED QUERY STRING:**\nYou MUST use this EXACT GraphQL query string in the `query` field:\n```\n{ patients(firstName: \"Mary\") { id firstName lastName account { id name } } }\n```\n\n**Parameters:**\n- `firstName`: The first name to search for (partial match, case-insensitive)\n- `lastName`: The last name to search for (partial match, case-insensitive)\n- At least one of firstName or lastName should be provided for meaningful results\n\n**SECURITY:**\n- Only returns patients the authenticated user has permission to access\n- Patients the user cannot access will NOT appear in results (no 'access denied' - they simply won't be listed)\n- Sensitive fields are masked based on the user's disclosure permissions\n- Get only the service users that don't have # as their first or last name.\n\n**HANDLING MULTIPLE RESULTS:**\nIf multiple patients match the name:\n1. Present ALL matches to the user with their details (name, portfolio/account name)\n2. Ask the user to clarify which one they mean\n3. Use the confirmed patient's `id` for subsequent API calls\n\n**EXAMPLE RESPONSE FORMAT when multiple matches:**\n```\nI found multiple service users matching 'Mary':\n\n1. Mary Smith (ID: 123) - Portfolio: Care Home A\n2. Mary Davies (ID: 456) - Portfolio: Care Home B\n3. Mary Wilson (ID: 789) - Portfolio: Supported Living C\n\nWhich one would you like me to look up?\n```\n\n**EXAMPLE RESPONSE FORMAT when single match:**\n```\nFound Mary Smith (ID: 123) in Portfolio: Care Home A.\n[Then proceed with the user's original request using this ID]\n```\n\n**EXAMPLE RESPONSE FORMAT when no matches:**\n```\nI couldn't find any service users matching 'Mary Smith' that you have access to. Please check the name and try again.\n```",
+        "operationId": "lookupPatientByName",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraphQLPatientsRequest"
+              },
+              "examples": {
+                "Example request": {
+                  "description": "Example request",
+                  "value": {
+                    "query": "{ patients(firstName: \"Mary\") { id firstName lastName account { id name } } }"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Patient lookup results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/service/insight/patient/{patientId}/service/llm-report": {
       "get": {
         "tags": [
           "insight-analytics-controller"
         ],
-        "summary": "Request the most recent LLM (AI) report for a given service user",
-        "description": "Returns the latest LLM-generated report (AI Summary) for the specified Service User (patient). The response includes Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The report is returned in **Markdown** format.\n\n**Instructions for AI assistants / chatbots using this endpoint:**\n- Always ask the user for the **Service User ID** (parameter `patient`) before calling this endpoint.\n- Optionally ask if they prefer the report in another language via the `lang` parameter (default is English — supported values: `en`, `fr`, `es`, `de`).\n- **Do not create or display any charts, graphs, or images.** Only return or summarize text.\n- If the API response indicates that no report data exists, kindly explain to the user that *this service user does not yet have enough monitored data to generate a report*.\n- After delivering the report, explicitly ask the user: *“Would you like me to provide a brief summary of this report?”*.\n  - If the user says **yes**, generate a short, natural-language summary of the key insights.\n  - If the user says **no**, politely offer: *“Would you like me to get the report for another service user instead?”*.\n- **If the report was generated in Spanish, French, or German (based on the `lang` parameter), automatically continue the conversation in that same language**, including summaries and follow-up questions.\n- Maintain a professional and empathetic tone throughout the interaction, keeping the conversation concise and focused.",
+        "summary": "Get the latest AI-generated daily care summary report for a service user",
+        "description": "Returns the latest LLM-generated report (AI Summary) for the specified Service User (patient). The response includes Key Changes, Daily Routine, Activity Levels, Weekday vs. Weekend Trends, Bathroom Activity, Special Observations, and Conclusions. The report is returned in **Markdown** format.\n\n**IMPORTANT - RESOLVING SERVICE USER NAMES TO IDs:**\nIf the user provides a **name** instead of an ID (e.g., 'Get the report for Agnes Smith'), you MUST:\n1. First call the `lookupPatientByName` endpoint (`/assure/graphql/admin/patientLookup`) with the name\n2. If multiple matches are found, ask the user to clarify which one they mean\n3. Once you have the correct `patientId`, call this endpoint\n\n**WHEN TO USE THIS ENDPOINT:**\n- User asks for 'daily care summary', 'activity report', 'AI report', or 'LLM report'\n- User asks about a service user's routine, activity levels, or behavioral patterns\n- User asks 'How is [name] doing?' or 'What's happening with [name]?'\n\n**Parameters:**\n- `patientId` (required): The service user's ID - use `lookupPatientByName` to find this if user provides a name\n- `lang` (optional): Language for the report - `en` (default), `fr`, `es`, `de`\n\n**RESPONSE HANDLING:**\n- If `content` is null with message 'No report exists': Tell the user this service user doesn't have enough monitored data yet\n- If successful: Present the Markdown content to the user\n- **Do not create or display any charts, graphs, or images** - only return or summarize text\n\n**FOLLOW-UP:**\nAfter delivering the report, ask: 'Would you like me to provide a brief summary of this report?'\n- If yes: Generate a short, natural-language summary of the key insights\n- If no: Offer to get the report for another service user\n\n**LANGUAGE HANDLING:**\nIf the report was requested in Spanish, French, or German, continue the conversation in that language.",
         "operationId": "getLatestReport",
         "parameters": [
           {
@@ -285,6 +328,41 @@
             "$ref": "#/components/schemas/CasesVariables"
           }
         }
+      },
+      "GraphQLPatientsRequest": {
+        "required": [
+          "query",
+          "variables"
+        ],
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixed GraphQL query string. DO NOT change this value; only change the variables. Use exactly this query.",
+            "enum": [
+              "{ patients(firstName: $firstName, lastName: $lastName) { id firstName lastName account { id name } } }"
+            ]
+          },
+          "variables": {
+            "$ref": "#/components/schemas/PatientsVariables"
+          }
+        }
+      },
+      "PatientsVariables": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "First name to search for (partial match supported)",
+            "example": "Mary"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name to search for (partial match supported)",
+            "example": "Smith"
+          }
+        },
+        "description": "Variables for the GraphQL query"
       }
     }
   }
