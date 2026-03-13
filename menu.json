@@ -3,7 +3,7 @@
         "id": "Assure.Workflow",
         "displayName": "Assure Workflow",
         "icon": {
-            "url": "https://dev-api.assure.hsc.accessacloud.com/memo/img/menu_logo.png"
+            "url": "https://bogdanbz93.github.io/assure_workflows.png"
         },
         "location": {
             "widgetId": "access.assure-workflow",
