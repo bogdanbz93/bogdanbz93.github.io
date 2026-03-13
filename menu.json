@@ -1,0 +1,14 @@
+[
+    {
+        "id": "Assure.Workflow",
+        "displayName": "Assure Workflow",
+        "icon": {
+            "url": "https://dev-api.assure.hsc.accessacloud.com/memo/img/menu_logo.png"
+        },
+        "location": {
+            "widgetId": "access.assure-workflow",
+            "navigationType": "Workspace",
+            "instanceId": "274d3cf1-4939-422d-9152-24249514d2c9"
+        }       
+    }
+]
